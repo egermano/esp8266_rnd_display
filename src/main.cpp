@@ -4,13 +4,16 @@
 
 # include "LedControl.h"
 
+#define DISPLAYS 2
 #define DISPLAYDIGITS 8
+
+#define MINRANDOM 100000
+#define MAXRANDOM 99999999
 
 // EasyESP or NodeMCU Pin D8 to DIN, D7 to Clk, D6 to LOAD, no.of devices is 1
 LedControl lc=LedControl(D8,D7,D6,1);
 
-float randNumber1;
-float randNumber2;
+float *randNumber;
 
 /*****
   https://forum.arduino.cc/index.php?topic=225326.0
@@ -26,10 +29,12 @@ float randNumber2;
   Return value:
     void
 *****/
-void ConvertNumberToString(long addr, float val, unsigned char precision, char *buffer)
+void ConvertNumberToString(long addr, float val, unsigned char precision)
 {
   int i;
   int start;
+
+  char *buffer;
 
   dtostrf(val, DISPLAYDIGITS, precision, buffer);
   start = DISPLAYDIGITS - precision - 1;
@@ -54,27 +59,31 @@ void setup() {
     Serial.begin(9600);
 
     // Initialize the MAX7219 device
-    lc.shutdown(0,false);   // Enable display
-    lc.setIntensity(0,15);  // Set brightness level (0 is min, 15 is max)
-    lc.clearDisplay(0);     // Clear display register
+    for (int i = 0; i < DISPLAYS; i++) {
+      lc.shutdown(i,false);   // Enable display
+      lc.setIntensity(i,15);  // Set brightness level (0 is min, 15 is max)
+      lc.clearDisplay(i);     // Clear display register
 
-    randNumber1 = random(1000000, 9999999);
-    randNumber2 = random(1000000, 9999999);
+      randNumber[i] = random(MINRANDOM, MAXRANDOM);
 
-    Serial.print("Numero gerado 1: ");
-    Serial.println(randNumber1);
+      Serial.print("Numero gerado display ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(randNumber[i]);
+    }
 
-    Serial.print("Numero gerado 2: ");
-    Serial.println(randNumber2);
+
+
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
 
-    char buffer[10];
+    int i;
 
-    ConvertNumberToString(0, randNumber1, 0, buffer);
-    ConvertNumberToString(1, randNumber2, 0, buffer);
+    for (i = 0; i < DISPLAYS; i++) {
+      ConvertNumberToString(i, randNumber[i], 0);
+    }
 
     delay(5000);
 }
