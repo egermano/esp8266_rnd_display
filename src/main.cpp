@@ -65,7 +65,7 @@ void setup() {
     Serial.println(randNumber1);
 
     Serial.print("Numero gerado 2: ");
-    Serial.println(randNumber1);
+    Serial.println(randNumber2);
 }
 
 void loop() {
